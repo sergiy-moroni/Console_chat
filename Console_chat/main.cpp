@@ -1,14 +1,16 @@
-﻿#include <iostream>
-#include "User.h"
+﻿#include "User.h"
+#include "Message.h"
 #include <vector>
+
 using namespace std;
 
 vector<User> Userslist;//вектор хранит в себе данные зарегестрированных пользователей чата
+int user_islogin = 0;
 
-bool inuser = false; // состояние подключения пользователя к чату
+	bool inuser = false; // состояние подключения пользователя к чату
 
 //метод поиска пользователя среди зарегестрированных по логину и паролю
-bool  FindUser(string login, string pass) {
+	bool  FindUser(string login, string pass) {
 
 	int i = 0;
 	bool j = false;
@@ -18,6 +20,7 @@ bool  FindUser(string login, string pass) {
 		if (login == l && pass == k) {
 
 			cout <<endl << "Здравствуйте, " << Userslist[i].GetName() << "!" << endl;
+			user_islogin = i;
 			return j;
 			break;
 			++i;
@@ -33,7 +36,7 @@ bool  FindUser(string login, string pass) {
 }
 
 //метод поиска зарегестрированный логин для защиты от повторной регистрации
-bool FindLogin(string login) {
+	bool FindLogin(string login) {
 	bool j = false;
 	for (int i = 0; i < size(Userslist); i++) {
 		if (Userslist[i].Getlog() == login) {
@@ -46,7 +49,7 @@ bool FindLogin(string login) {
 }
 
 //метод создания нового пользователя чата
-User CreateNewUser() {
+	User CreateNewUser() {
 	cout << "Введите данные для регистрации" << endl;
 	cout << "Введите имя пользователя: ";
 	string name;
@@ -54,35 +57,50 @@ User CreateNewUser() {
 	string pass;
 	cin >> name;
 	cout << "Введите логин для входа в систему: ";
-	cin >> login;
-	if (FindLogin(login)) {
-		cout << "Данный логин уже занят выберите другой!";
+	
+	bool l = true;
+	while (l) {
 		cin >> login;
+		if (FindLogin(login)) {
+			cout << "Данный логин уже занят выберите другой!" << endl;
+			cout << "Введите логин для входа в систему: ";
+		}
+		else {
+			l = false;
+		}
 	}
 	cout << "Введите пароль: ";
 	cin >> pass;
 	
-	User X(name, login, pass);
+	User U(name, login, pass);
 	
-		Userslist.push_back(X);
+		Userslist.push_back(U);
 		cout << "Пользователь успешно зарегистрирован!" << endl;
-		return X;
+		return U;
 	
 }
 
 
 //метод получения списка зарегестрированных пользователей
-void PrintUsersNames() {
+	void PrintUsersNames() {
 	for (int i = 0; i < size(Userslist); ++i) {
 		cout << (i + 1) << ". " << Userslist[i].GetName() << endl;
 	}
 }
 
+//метод возвращает номер пользователя в векторе по имени
+	int FindUserinUserslist(string name) {
+	for (int i = 0; i < size(Userslist); ++i) {
 
+		if (Userslist[i].GetName() == name) {
+			return i;
+		}
+	}return -1;
+}
 
-int main() {
+	int main() {
 
-
+	setlocale(LC_ALL, "Russian");
 	setlocale(LC_ALL, "");
 	// вход в систему
 	cout << "Добро пожаловать в чат!" << endl;
@@ -91,15 +109,12 @@ int main() {
 		std::cout << "Введите 1 для входа.\nВведите 2 для регистрации нового пользователя \nВведите 0 для выхода из чата" << endl;
 		short c = 0;
 		cin >> c;
-
-
+	
 		// регистрация нового пользователя
 		if (c == 2)
-		{
-			CreateNewUser();
-			continue;
-		}
 
+		{CreateNewUser();
+			continue;}
 		if (c == 0) { break; }
 
 		//вход по логину ипаролю
@@ -114,36 +129,66 @@ int main() {
 			if (FindUser(log, pas) == false) {
 				while (true) {
 					inuser = true;
+					
 					cout << "Введите номер желаемого действия: " << endl;
 					cout << "1 - Прочитать входящие сообщения" << endl;
 					cout << "2 - Написать сообщение другому пользователю" << endl;
 					cout << "0 - Выйти" << endl;
 					short c = 0;
 					cin >> c;
+
 					switch (c) {
+
 					case 1:
 
+						Userslist[user_islogin].PrintMessages();
 						break;
+
 					case 2:
-						cout << "Выберите номер пользователя кому хотите отправить сообщение: " << endl;
+						cout << "Введите пользователя которому хотите отправить сообщение," << endl;
 						PrintUsersNames();
-						short h = 0;
-						string massage;
+							cout << "\"all\"  - чтобы отправиль сообщение всем пользователям чата:" << endl;;
+						string h;
+						string message;
 						cin >> h;
-						cout << "Введите текст сообщения: ";
-						cin >> massage;
+						if (h == "all") {
+							cout << "Введите текст сообщения: " << endl;
+							cout << endl;
+							getline(cin, message, '\n');
+							getline(cin, message, '\n');
+							
+								Message<string> mes(Userslist[user_islogin].GetName(), message);
+								for (int i = 0; i < size(Userslist); ++i) {
+									Userslist[i].Setmessage(mes);
+							}
+						}
+						else {
+							int t = -1;
 
+						t = FindUserinUserslist(h);
+						
+							if (t == (-1))
 
-					
+							{
+								cout << "Пользователь с данным именем не найден" << endl;
+							}
+							else {
+								cout << "Введите текст сообщения: " << endl;
+								cout << endl;
+								getline(cin, message, '\n');
+								getline(cin, message, '\n');
+
+								Message<string> mes(Userslist[user_islogin].GetName(), message);
+
+								Userslist[FindUserinUserslist(h)].Setmessage(mes);
+							}
+						}
 					}
 					if (c == 0) { break; }
 				}
 			}
 			else { inuser = false; }
-
 		}
-
 	}
-
 	return 0;
 }
