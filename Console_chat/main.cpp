@@ -2,12 +2,16 @@
 #include "Message.h"
 #include <vector>
 
-using namespace std;
 
+using namespace std;
 vector<User> Userslist;//вектор хранит в себе данные зарегестрированных пользователей чата
 int user_islogin = 0;
 
 	bool inuser = false; // состояние подключения пользователя к чату
+
+	void exp() {
+		throw "Неверный ВВОД!";
+	}
 
 //метод поиска пользователя среди зарегестрированных по логину и паролю
 	bool  FindUser(string login, string pass) {
@@ -19,20 +23,20 @@ int user_islogin = 0;
 		string k = Userslist[i].Getpass();
 		if (login == l && pass == k) {
 
-			cout <<endl << "Здравствуйте, " << Userslist[i].GetName() << "!" << endl;
+			cout <<endl << "Здравствуйте, " << Userslist[i].GetName() << "!" << endl << endl;
 			user_islogin = i;
+			j = true;
 			return j;
 			break;
-			++i;
-
 		}
 		else {
-			
-			//return false; 
 			++i;
 		}
 	}
-	if(j==false){ cout << "Пользователь не найден" << endl; }
+	if (j == false) {
+		cout << "\nНеверный логин или пароль" << endl;
+	}
+	return j;
 }
 
 //метод поиска зарегестрированный логин для защиты от повторной регистрации
@@ -49,13 +53,15 @@ int user_islogin = 0;
 }
 
 //метод создания нового пользователя чата
-	User CreateNewUser() {
+	void CreateNewUser() {
 	cout << "Введите данные для регистрации" << endl;
 	cout << "Введите имя пользователя: ";
 	string name;
+	char namec[256];
 	string login;
 	string pass;
-	cin >> name;
+	cin >> namec;
+	name = namec;
 	cout << "Введите логин для входа в систему: ";
 	
 	bool l = true;
@@ -75,11 +81,8 @@ int user_islogin = 0;
 	User U(name, login, pass);
 	
 		Userslist.push_back(U);
-		cout << "Пользователь успешно зарегистрирован!" << endl;
-		return U;
-	
+		cout << "Пользователь успешно зарегистрирован!" << endl << endl;
 }
-
 
 //метод получения списка зарегестрированных пользователей
 	void PrintUsersNames() {
@@ -88,7 +91,7 @@ int user_islogin = 0;
 	}
 }
 
-//метод возвращает номер пользователя в векторе по имени
+//метод возвращает номер пользователя в списке Userlist по имени
 	int FindUserinUserslist(string name) {
 	for (int i = 0; i < size(Userslist); ++i) {
 
@@ -99,20 +102,22 @@ int user_islogin = 0;
 }
 
 	int main() {
+		setlocale(LC_ALL, "Rus");
 
-	setlocale(LC_ALL, "Russian");
-	setlocale(LC_ALL, "");
 	// вход в систему
 	cout << "Добро пожаловать в чат!" << endl;
 	while (true) {
+		cout << endl;
 		cout << "Количество зарегестрированных пользователей: " << size(Userslist) << endl;
-		std::cout << "Введите 1 для входа.\nВведите 2 для регистрации нового пользователя \nВведите 0 для выхода из чата" << endl;
-		short c = 0;
+		std::cout << "Введите желаемое действие: \n1 - для входа.\n2 - для регистрации нового пользователя \n0 - для выхода из чата" << endl;
+		int c;
 		cin >> c;
-	
+		if (c !=0 && c!=2&& c!=1) {
+			cout << "Неверный ВВОД!" << endl;
+			continue;
+		}
 		// регистрация нового пользователя
 		if (c == 2)
-
 		{CreateNewUser();
 			continue;}
 		if (c == 0) { break; }
@@ -126,66 +131,77 @@ int user_islogin = 0;
 			cin >> log;
 			std::cout << "Введите пароль: ";
 			cin >> pas;
-			if (FindUser(log, pas) == false) {
+			if (FindUser(log, pas)) {
 				while (true) {
+					string h;
+					string message;
 					inuser = true;
-					
+					cout << endl;
+					//выбор пользователем желаемого действия
 					cout << "Введите номер желаемого действия: " << endl;
-					cout << "1 - Прочитать входящие сообщения" << endl;
+					cout << "1 - Прочитать все входящие сообщения" << endl;
 					cout << "2 - Написать сообщение другому пользователю" << endl;
 					cout << "0 - Выйти" << endl;
-					short c = 0;
+					int c = 0;
 					cin >> c;
-
+					if (c < 0 && c > 2) {
+						cout << "Неверный ВВОД!" << endl;
+					}
+					if (c == 0) {
+						cout << "Досвидания, " << Userslist[user_islogin].GetName() << "!" << endl;
+						break;
+					}
 					switch (c) {
-
+		
 					case 1:
-
-						Userslist[user_islogin].PrintMessages();
+						if (Userslist[user_islogin].IsEmpty()) {
+							cout << "У вас еще нет входящих сообщений!" << endl;
+						}
+						else {
+							Userslist[user_islogin].PrintMessages();
+						}
 						break;
 
 					case 2:
-						cout << "Введите пользователя которому хотите отправить сообщение," << endl;
+						cout << "Введите ИМЯ пользователя которому хотите отправить сообщение: " << endl << endl;
 						PrintUsersNames();
-							cout << "\"all\"  - чтобы отправиль сообщение всем пользователям чата:" << endl;;
-						string h;
-						string message;
+						cout << "\"all\"  - чтобы отправиль сообщение всем пользователям чата:" << endl << endl;
 						cin >> h;
-						if (h == "all") {
+						if (h == "all") {// отправка сообщения всем пользователям чата
 							cout << "Введите текст сообщения: " << endl;
 							cout << endl;
 							getline(cin, message, '\n');
 							getline(cin, message, '\n');
-							
-								Message<string> mes(Userslist[user_islogin].GetName(), message);
-								for (int i = 0; i < size(Userslist); ++i) {
-									Userslist[i].Setmessage(mes);
+
+							Message<string> mes(Userslist[user_islogin].GetName(), message);
+							for (int i = 0; i < size(Userslist); ++i) {
+								Userslist[i].Setmessage(mes);
 							}
+							cout << "Сообщение разослано всем пользователям!" << endl;
 						}
 						else {
 							int t = -1;
+							t = FindUserinUserslist(h);//отправка сообщения по введенному имени полльзователя
 
-						t = FindUserinUserslist(h);
-						
 							if (t == (-1))
-
 							{
 								cout << "Пользователь с данным именем не найден" << endl;
 							}
-							else {
+							else { 
 								cout << "Введите текст сообщения: " << endl;
 								cout << endl;
 								getline(cin, message, '\n');
 								getline(cin, message, '\n');
 
 								Message<string> mes(Userslist[user_islogin].GetName(), message);
-
 								Userslist[FindUserinUserslist(h)].Setmessage(mes);
+								cout << "Сообщение отправлено!" << endl;
 							}
 						}
+
 					}
-					if (c == 0) { break; }
-				}
+				
+				} 
 			}
 			else { inuser = false; }
 		}

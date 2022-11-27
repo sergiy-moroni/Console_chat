@@ -1,31 +1,26 @@
 ﻿#pragma once
-#include <string>
 #include <vector>
 #include <iostream>
 #include "Message.h"
 
-using namespace std;
 class User {
 
 private:
-	string _name;
-	string _pass;
-	string _login;
-	vector<Message<string>> _messages;
+	std::string _name;
+	std::string _pass;
+	std::string _login;
+	std::vector<Message<std::string>> _messages;
 
 public:
-	User(string name, string login, string pass);
-	~User();
-	string GetName();
-	void SetName(string name);
-	string Getpass();
-	string Getlog();
-
-	//получение сообщения 
-	void Setmessage(Message<string> message);
-
-	// чтение сообщений 
-	void PrintMessages();
+	User(std::string name, std::string login, std::string pass);
+	virtual ~User();
+	std::string GetName();
+	void SetName(std::string name);
+	std::string Getpass();
+	std::string Getlog();
+	bool IsEmpty(); // получение наличия сообщений
+	void Setmessage(Message<std::string> message); //получение сообщения 
+	void PrintMessages();	// чтение сообщений 
 };
 
 
