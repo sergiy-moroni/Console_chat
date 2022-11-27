@@ -9,10 +9,6 @@ int user_islogin = 0;
 
 	bool inuser = false; // состояние подключения пользователя к чату
 
-	void exp() {
-		throw "Неверный ВВОД!";
-	}
-
 //метод поиска пользователя среди зарегестрированных по логину и паролю
 	bool  FindUser(string login, string pass) {
 
